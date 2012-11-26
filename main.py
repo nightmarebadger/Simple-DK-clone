@@ -9,7 +9,7 @@ def terminate():
     sys.exit()
 
 class Wall(pygame.sprite.Sprite):
-    def __init__(self, game, x, y, marked = False, sizew = 1, sizeh = 1):
+    def __init__(self, game, x, y, marked = False, health = 1, sizew = 1, sizeh = 1):
         pygame.sprite.Sprite.__init__(self)
         
         self.game = game
@@ -22,10 +22,13 @@ class Wall(pygame.sprite.Sprite):
         self.rect.center = (x,y)
         
         self.tmpmarked = False
+        
+        self.health = health
+        
         self.color()
         
+        #print(self.rect.x, self.rect.y, self.rect.centerx, self.rect.centery)
         
-    
     def update(self, time):
         pass
     
@@ -50,6 +53,15 @@ class Wall(pygame.sprite.Sprite):
                 self.image.fill(self.game.backgroundcolor)
                 self.image.fill(CORAL, rect=(1, 1, self.rect.width-2, self.rect.height-2))
                 #self.image.fill(CORAL, rect=(5, 5, self.width-10, self.height-10))
+                
+    def isHit(self, n):
+        self.health -= n
+        if(self.health < 0):
+            self.die()
+    
+    def die(self):
+        self.game.tileGroup.add(Tile(self.game, self.rect.centerx, self.rect.centery))
+        self.kill()
     
 class Tile(pygame.sprite.Sprite):
     def __init__(self, game, x, y, claimed = False, sizew = 1, sizeh = 1):
@@ -118,12 +130,17 @@ class Imp(pygame.sprite.Sprite):
     def update(self, time):
         self.calculatemove()
         self.move(self.vx*time*self.movespeed*self.game.basesize, self.vy*time*self.movespeed*self.game.basesize)
+        if(self.goingTo):
+            if(self.goingTo.rect.collidepoint(self.rect.center)):
+                self.goingTo.isHit(self.strength)
+            
     
     def calculatemove(self):
         #Find the position of a clicked area you can get to
         #Foo is the pos of the chosen marked wall
         #Bar is the pos of all walls that touch the tiles
-        foo = None
+        self.goingTo = None
+        
         bar = []
         for tile in self.game.tileGroup:
             #print(tile.rect.centerx, tile.rect.centery)
@@ -143,19 +160,21 @@ class Imp(pygame.sprite.Sprite):
                 if(tmp1 <= self.game.windowwidth and tmp2 <= self.game.windowheight):
                     bar.append((tmp1, tmp2))
             tmp1 = tile.rect.centerx
-            tmp2 = tile.rect.centery - self.game.basesize*tile.sizeh
+            tmp2 = tile.rect.centery + self.game.basesize*tile.sizeh
             if((tmp1, tmp2) not in bar):
                 if(tmp1 <= self.game.windowwidth and tmp2 <= self.game.windowheight):
                     bar.append((tmp1, tmp2))
-            #print(bar)
+        #print(bar)
+        flag = False
         for wall in self.game.wallGroup:
+            if(flag):
+                break
             if(wall.marked):
                 for (i,j) in bar:
                     if(wall.rect.collidepoint(i,j)):
-                        foo = wall.rect.center
+                        self.goingTo = wall
+                        flag = True
                         break
-                else:
-                    break
                 
         """
         for wall in self.game.wallGroup:
@@ -164,11 +183,11 @@ class Imp(pygame.sprite.Sprite):
                 break
         """
         #Calculate movement vector
-        if(foo):
+        if(self.goingTo):
             #print(foo, self.rect.x, self.rect.y)
             try:
-                dx = self.rect.centerx - foo[0]
-                dy = self.rect.centery - foo[1]
+                dx = self.rect.centerx - self.goingTo.rect.centerx
+                dy = self.rect.centery - self.goingTo.rect.centery
                 #print(dx, dy)
                 self.vx = - dx/(dx**2 + dy**2)**(1/2)
                 self.vy = - dy/(dx**2 + dy**2)**(1/2)
@@ -240,6 +259,7 @@ class Game:
         self.clock.tick()
         while(self.continue_playing):
             time = self.clock.tick(self.fps)
+            #print(self.clock.get_fps())
             
             #Key handler
             for event in pygame.event.get():
