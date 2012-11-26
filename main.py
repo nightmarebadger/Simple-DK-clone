@@ -186,11 +186,11 @@ class Imp(pygame.sprite.Sprite):
         if(self.goingTo):
             #print(foo, self.rect.x, self.rect.y)
             try:
-                dx = self.rect.centerx - self.goingTo.rect.centerx
-                dy = self.rect.centery - self.goingTo.rect.centery
+                dx = self.goingTo.rect.centerx - self.rect.centerx
+                dy = self.goingTo.rect.centery- self.rect.centery
                 #print(dx, dy)
-                self.vx = - dx/(dx**2 + dy**2)**(1/2)
-                self.vy = - dy/(dx**2 + dy**2)**(1/2)
+                self.vx = dx/(dx**2 + dy**2)**(1/2)
+                self.vy = dy/(dx**2 + dy**2)**(1/2)
                 #print(self.vx, self.vy)
             except:
                 self.vx = self.vy = 0
