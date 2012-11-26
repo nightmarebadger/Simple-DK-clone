@@ -155,7 +155,7 @@ class Game:
         
         for i in range(self.basesize//2, 800, self.basesize):
             for j in range(self.basesize//2, 800, self.basesize):
-                if(i == 780 == j):
+                if(i == j == 800 - self.basesize//2):
                     self.tileGroup.add(Tile(self, i, j, False))
                     self.impGroup.add(Imp(self, i, j, 1, 1, 1))
                 else:
