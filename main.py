@@ -2,18 +2,17 @@
 
 import pygame, sys
 from pygame.locals import *
+from colors import *
 
 def terminate():
     pygame.quit()
     sys.exit()
 
-class Tile(pygame.sprite.Sprite):
+class Wall(pygame.sprite.Sprite):
     def __init__(self, game, x, y, width, height, marked = False):
         pygame.sprite.Sprite.__init__(self)
         
         self.game = game
-        self.x = x
-        self.y = y
         self.width = width
         self.height = height
         self.marked = marked
@@ -27,7 +26,6 @@ class Tile(pygame.sprite.Sprite):
         self.rect.center = (x,y)
     
     def update(self, time):
-
         pass
     
     def clicked(self):
@@ -37,18 +35,72 @@ class Tile(pygame.sprite.Sprite):
     def color(self):
         if(self.marked):
             if(self.tmpmarked):
-                self.image.fill((0,0,0))
-                self.image.fill((100,50,50), rect=(1, 1, self.width-2, self.height-2))
+                self.image.fill(self.game.backgroundcolor)
+                self.image.fill(OLIVE, rect=(1, 1, self.width-2, self.height-2))
             else:
-                self.image.fill((0,0,0))
-                self.image.fill((0,0,180), rect=(1, 1, self.width-2, self.height-2))
+                self.image.fill(self.game.backgroundcolor)
+                self.image.fill(CAPRI, rect=(1, 1, self.width-2, self.height-2))
+                #self.image.fill(CAPRI, rect=(5, 5, self.width-10, self.height-10))
         else:
             if(self.tmpmarked):
-                self.image.fill((0,0,0))
-                self.image.fill((50, 50, 10), rect=(1, 1, self.width-2, self.height-2))
+                self.image.fill(self.game.backgroundcolor)
+                self.image.fill(AQUA, rect=(1, 1, self.width-2, self.height-2))
             else:
-                self.image.fill((0,0,0))
-                self.image.fill((175, 50, 50), rect=(1, 1, self.width-2, self.height-2))
+                self.image.fill(self.game.backgroundcolor)
+                self.image.fill(CORAL, rect=(1, 1, self.width-2, self.height-2))
+                #self.image.fill(CORAL, rect=(5, 5, self.width-10, self.height-10))
+    
+class Tile(pygame.sprite.Sprite):
+    def __init__(self, game, x, y, width, height, claimed = False):
+        pygame.sprite.Sprite.__init__(self)
+        
+        self.game = game
+        self.x = x
+        self.width = width
+        self.height = height
+        self.claimed = claimed
+        
+        self.image = pygame.Surface((width, height))
+        
+        self.rect = self.image.get_rect()
+        self.rect.center = (x,y)
+        
+        self.color()
+        
+    def update(self, time):
+        pass
+    
+    def color(self):
+        if(self.claimed):
+            self.image.fill(self.game.backgroundcolor)
+            self.image.fill(RED, rect=(1, 1, self.width-2, self.height-2))
+        else:
+            self.image.fill(self.game.backgroundcolor)
+            self.image.fill(WHITE, rect=(1, 1, self.width-2, self.height-2))
+
+class Imp(pygame.sprite.Sprite):
+    def __init__(self, x, y, movespeed, strength, hitspeed, carryload):
+        pygame.sprite.Sprite.__init__(self)
+        
+        self.x = x
+        self.y = y
+        self.movespeed = movespeed
+        self.strength = strength
+        self.hitspeed = hitspeed
+        self.carryload = strength * 10
+        
+        self.vx = 0
+        self.vy = 0
+    
+    def update(self, time):
+        self.calculatemove()
+        self.move(self.vx*time, self.vy*time)
+    
+    def calculatemove(self):
+        pass
+    
+        
+        
         
 class Game:
     def __init__(self, windowwidth, windowheight, fps=120):
@@ -56,8 +108,10 @@ class Game:
         self.windowwidth = windowwidth
         self.windowheight = windowheight
         self.fps = fps
+        
+        self.backgroundcolor = BLACK
         self.background = pygame.Surface((self.windowwidth, self.windowheight))
-        self.background.fill((0,0,0))
+        self.background.fill(self.backgroundcolor)
         
         self.caption = "Simple DK-like game"
         
@@ -71,10 +125,16 @@ class Game:
         self.surface = pygame.display.set_mode((self.windowwidth, self.windowheight), SRCALPHA)
         
         #Sprite groups
+        self.wallGroup = pygame.sprite.RenderPlain()
         self.tileGroup = pygame.sprite.RenderPlain()
+        
         for i in range(20, 800, 40):
             for j in range(20, 800, 40):
-                self.tileGroup.add(Tile(self, i, j, 40, 40, False))
+                if(i == 780 == j):
+                    self.tileGroup.add(Tile(self, i, j, 40, 40, False))
+                else:
+                    self.wallGroup.add(Wall(self, i, j, 40, 40, False))
+
         
     def gameloop(self):
         self.continue_playing = True
@@ -100,36 +160,37 @@ class Game:
                     
                     """
                     if(event.button == 1):
-                        for tile in self.tileGroup:
-                            if(tile.rect.collidepoint(event.pos)):
-                                tile.clicked()
+                        for wall in self.wallGroup:
+                            if(wall.rect.collidepoint(event.pos)):
+                                wall.clicked()
                     elif(event.button == 3):
                         self.selection_first_pos = event.pos
                 elif(event.type == MOUSEBUTTONUP):
                     if(event.button == 3):
                         self.selection_rect = pygame.Rect(self.selection_first_pos, (-(self.selection_first_pos[0]-event.pos[0]), -(self.selection_first_pos[1]-event.pos[1])))
                         self.selection_rect.normalize()
-                        for tile in self.tileGroup:
-                            if(self.selection_rect.colliderect(tile.rect)):
-                                tile.tmpmarked = False
-                                tile.clicked()    
+                        for wall in self.wallGroup:
+                            if(self.selection_rect.colliderect(wall.rect)):
+                                wall.tmpmarked = False
+                                wall.clicked()    
                 elif(event.type == MOUSEMOTION):
                     if(pygame.mouse.get_pressed()[2]):
                         self.selection_rect = pygame.Rect(self.selection_first_pos, (-(self.selection_first_pos[0]-event.pos[0]), -(self.selection_first_pos[1]-event.pos[1])))
                         self.selection_rect.normalize()
-                        for tile in self.tileGroup:
-                            if(self.selection_rect.colliderect(tile.rect)):
-                                tile.tmpmarked=True
-                                tile.color()
+                        for wall in self.wallGroup:
+                            if(self.selection_rect.colliderect(wall.rect)):
+                                wall.tmpmarked=True
+                                wall.color()
                             else:
-                                tile.tmpmarked=False
-                                tile.color()
+                                wall.tmpmarked=False
+                                wall.color()
             
             #Update groups
-            self.tileGroup.update(time/1000)
+            self.wallGroup.update(time/1000)
             
             #Drawing
             self.surface.blit(self.background, (0,0))
+            self.wallGroup.draw(self.surface)
             self.tileGroup.draw(self.surface)
             
             pygame.display.update()
