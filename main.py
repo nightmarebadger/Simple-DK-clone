@@ -27,7 +27,6 @@ class Wall(pygame.sprite.Sprite):
         
         self.color()
         
-        #print(self.rect.x, self.rect.y, self.rect.centerx, self.rect.centery)
         
     def update(self, time):
         pass
@@ -44,7 +43,6 @@ class Wall(pygame.sprite.Sprite):
             else:
                 self.image.fill(self.game.backgroundcolor)
                 self.image.fill(CAPRI, rect=(1, 1, self.rect.width-2, self.rect.height-2))
-                #self.image.fill(CAPRI, rect=(5, 5, self.width-10, self.height-10))
         else:
             if(self.tmpmarked):
                 self.image.fill(self.game.backgroundcolor)
@@ -52,7 +50,6 @@ class Wall(pygame.sprite.Sprite):
             else:
                 self.image.fill(self.game.backgroundcolor)
                 self.image.fill(CORAL, rect=(1, 1, self.rect.width-2, self.rect.height-2))
-                #self.image.fill(CORAL, rect=(5, 5, self.width-10, self.height-10))
                 
     def isHit(self, n):
         self.health -= n
@@ -137,13 +134,11 @@ class Imp(pygame.sprite.Sprite):
     
     def calculatemove(self):
         #Find the position of a clicked area you can get to
-        #Foo is the pos of the chosen marked wall
         #Bar is the pos of all walls that touch the tiles
         self.goingTo = None
         
         bar = []
         for tile in self.game.tileGroup:
-            #print(tile.rect.centerx, tile.rect.centery)
             tmp1 = tile.rect.centerx + self.game.basesize*tile.sizew
             tmp2 = tile.rect.centery
             if((tmp1, tmp2) not in bar):
@@ -164,7 +159,6 @@ class Imp(pygame.sprite.Sprite):
             if((tmp1, tmp2) not in bar):
                 if(tmp1 <= self.game.windowwidth and tmp2 <= self.game.windowheight):
                     bar.append((tmp1, tmp2))
-        #print(bar)
         flag = False
         for wall in self.game.wallGroup:
             if(flag):
@@ -175,13 +169,7 @@ class Imp(pygame.sprite.Sprite):
                         self.goingTo = wall
                         flag = True
                         break
-                
-        """
-        for wall in self.game.wallGroup:
-            if(wall.marked):
-                foo = wall.rect.center
-                break
-        """
+
         #Calculate movement vector
         if(self.goingTo):
             #print(foo, self.rect.x, self.rect.y)
@@ -201,7 +189,6 @@ class Imp(pygame.sprite.Sprite):
         if(dx != 0 or dy != 0):
             self.movex += dx
             self.movey += dy
-            #print("moving...")
             self.rect.x = self.rect.x + int(self.movex)
             self.rect.y = self.rect.y + int(self.movey)
             self.movex = self.movex - int(self.movex)
@@ -229,7 +216,6 @@ class Game:
         self.basesize = 80
         
         self.lattice = [["wall" for i in range(self.windowwidth//self.basesize)] for j in range(self.windowheight//self.basesize)]
-        #print(self.lattice)
         
     def setup(self):
         pygame.init()
@@ -248,7 +234,6 @@ class Game:
                     self.tileGroup.add(Tile(self, i, j, False))
                     self.impGroup.add(Imp(self, i, j, 1, 1, 1))
                     self.lattice[-1][-1] = "tile"
-                    #print(self.lattice)
                 else:
                     self.wallGroup.add(Wall(self, i, j, False))
                     
