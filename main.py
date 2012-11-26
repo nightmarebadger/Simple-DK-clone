@@ -27,7 +27,7 @@ class Tile(pygame.sprite.Sprite):
         self.rect.center = (x,y)
     
     def update(self, time):
-        #self.tmpmarked = False
+
         pass
     
     def clicked(self):
@@ -100,7 +100,6 @@ class Game:
                     
                     """
                     if(event.button == 1):
-                        print("Klik levi")
                         for tile in self.tileGroup:
                             if(tile.rect.collidepoint(event.pos)):
                                 tile.clicked()
@@ -108,19 +107,12 @@ class Game:
                         self.selection_first_pos = event.pos
                 elif(event.type == MOUSEBUTTONUP):
                     if(event.button == 3):
-                        #print(self.selection_first_pos, event.pos)
                         self.selection_rect = pygame.Rect(self.selection_first_pos, (-(self.selection_first_pos[0]-event.pos[0]), -(self.selection_first_pos[1]-event.pos[1])))
-                        #print(self.selection_rect.topleft, self.selection_rect.width, self.selection_rect.height)
                         self.selection_rect.normalize()
                         for tile in self.tileGroup:
                             if(self.selection_rect.colliderect(tile.rect)):
                                 tile.tmpmarked = False
-                                tile.clicked()
-                                
-                        #self.tmpRectGroup.add(self.selection_rect)   
-                        #pygame.draw.rect(self.surface, (0,0,0), self.selection_rect)
-                        #pygame.display.update()
-                        #x = input("Pocakaj")     
+                                tile.clicked()    
                 elif(event.type == MOUSEMOTION):
                     if(pygame.mouse.get_pressed()[2]):
                         self.selection_rect = pygame.Rect(self.selection_first_pos, (-(self.selection_first_pos[0]-event.pos[0]), -(self.selection_first_pos[1]-event.pos[1])))
