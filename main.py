@@ -9,21 +9,22 @@ def terminate():
     sys.exit()
 
 class Wall(pygame.sprite.Sprite):
-    def __init__(self, game, x, y, width, height, marked = False):
+    def __init__(self, game, x, y, marked = False, sizew = 1, sizeh = 1):
         pygame.sprite.Sprite.__init__(self)
         
         self.game = game
-        self.width = width
-        self.height = height
         self.marked = marked
+        self.sizew = sizew
+        self.sizeh = sizeh
         
-        self.image = pygame.Surface((width, height))
+        self.image = pygame.Surface((self.sizew*self.game.basesize, self.sizeh*self.game.basesize))
+        self.rect = self.image.get_rect()
+        self.rect.center = (x,y)
         
         self.tmpmarked = False
         self.color()
         
-        self.rect = self.image.get_rect()
-        self.rect.center = (x,y)
+        
     
     def update(self, time):
         pass
@@ -36,31 +37,31 @@ class Wall(pygame.sprite.Sprite):
         if(self.marked):
             if(self.tmpmarked):
                 self.image.fill(self.game.backgroundcolor)
-                self.image.fill(OLIVE, rect=(1, 1, self.width-2, self.height-2))
+                self.image.fill(OLIVE, rect=(1, 1, self.rect.width-2, self.rect.height-2))
             else:
                 self.image.fill(self.game.backgroundcolor)
-                self.image.fill(CAPRI, rect=(1, 1, self.width-2, self.height-2))
+                self.image.fill(CAPRI, rect=(1, 1, self.rect.width-2, self.rect.height-2))
                 #self.image.fill(CAPRI, rect=(5, 5, self.width-10, self.height-10))
         else:
             if(self.tmpmarked):
                 self.image.fill(self.game.backgroundcolor)
-                self.image.fill(AQUA, rect=(1, 1, self.width-2, self.height-2))
+                self.image.fill(AQUA, rect=(1, 1, self.rect.width-2, self.rect.height-2))
             else:
                 self.image.fill(self.game.backgroundcolor)
-                self.image.fill(CORAL, rect=(1, 1, self.width-2, self.height-2))
+                self.image.fill(CORAL, rect=(1, 1, self.rect.width-2, self.rect.height-2))
                 #self.image.fill(CORAL, rect=(5, 5, self.width-10, self.height-10))
     
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, game, x, y, width, height, claimed = False):
+    def __init__(self, game, x, y, claimed = False, sizew = 1, sizeh = 1):
         pygame.sprite.Sprite.__init__(self)
         
         self.game = game
         self.x = x
-        self.width = width
-        self.height = height
         self.claimed = claimed
+        self.sizew = sizew
+        self.sizeh = sizeh
         
-        self.image = pygame.Surface((width, height))
+        self.image = pygame.Surface((self.sizew*self.game.basesize, self.sizeh*self.game.basesize))
         
         self.rect = self.image.get_rect()
         self.rect.center = (x,y)
@@ -73,10 +74,10 @@ class Tile(pygame.sprite.Sprite):
     def color(self):
         if(self.claimed):
             self.image.fill(self.game.backgroundcolor)
-            self.image.fill(RED, rect=(1, 1, self.width-2, self.height-2))
+            self.image.fill(RED, rect=(1, 1, self.rect.width-2, self.rect.height-2))
         else:
             self.image.fill(self.game.backgroundcolor)
-            self.image.fill(WHITE, rect=(1, 1, self.width-2, self.height-2))
+            self.image.fill(WHITE, rect=(1, 1, self.rect.width-2, self.rect.height-2))
 
 class Imp(pygame.sprite.Sprite):
     def __init__(self, game, x, y, movespeed, strength, hitspeed, sizew = 0.5, sizeh = 0.5):
@@ -96,15 +97,16 @@ class Imp(pygame.sprite.Sprite):
         self.sizew = sizew
         self.sizeh = sizeh
         
-        self.image = pygame.Surface((self.sizew*self.game.blowup, self.sizeh*self.game.blowup))
+        self.image = pygame.Surface((self.sizew*self.game.basesize, self.sizeh*self.game.basesize), SRCALPHA, 32)
+        self.image = self.image.convert_alpha()
         
         
         self.rect = self.image.get_rect()
         self.rect.center = (x,y)
         
-        self.image.fill(BLACK)
-        
-        pygame.draw.circle(self.image, YELLOW, (self.rect.width//2, self.rect.height//2), 5)
+        #self.image.fill(BLACK)
+        pygame.draw.circle(self.image, BLACK, (self.rect.width//2, self.rect.height//2), self.rect.width//2)
+        pygame.draw.circle(self.image, YELLOW, (self.rect.width//2, self.rect.height//2), self.rect.width//2-1)
         #pygame.draw.circl
         
         
@@ -138,26 +140,26 @@ class Game:
         self.selection_rect = None
         self.selection_first_pos = None
         
-        self.blowup = 40
+        self.basesize = 80
         
     def setup(self):
         pygame.init()
         pygame.display.set_caption(self.caption)
         self.clock = pygame.time.Clock()
-        self.surface = pygame.display.set_mode((self.windowwidth, self.windowheight), SRCALPHA)
+        self.surface = pygame.display.set_mode((self.windowwidth, self.windowheight), SRCALPHA, 32)
         
         #Sprite groups
         self.wallGroup = pygame.sprite.RenderPlain()
         self.tileGroup = pygame.sprite.RenderPlain()
         self.impGroup = pygame.sprite.RenderPlain()
         
-        for i in range(20, 800, 40):
-            for j in range(20, 800, 40):
+        for i in range(self.basesize//2, 800, self.basesize):
+            for j in range(self.basesize//2, 800, self.basesize):
                 if(i == 780 == j):
-                    self.tileGroup.add(Tile(self, i, j, 40, 40, False))
+                    self.tileGroup.add(Tile(self, i, j, False))
                     self.impGroup.add(Imp(self, i, j, 1, 1, 1))
                 else:
-                    self.wallGroup.add(Wall(self, i, j, 40, 40, False))
+                    self.wallGroup.add(Wall(self, i, j, False))
                     
 
         
