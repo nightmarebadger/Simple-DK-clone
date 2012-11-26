@@ -121,12 +121,48 @@ class Imp(pygame.sprite.Sprite):
     
     def calculatemove(self):
         #Find the position of a clicked area you can get to
+        #Foo is the pos of the chosen marked wall
+        #Bar is the pos of all walls that touch the tiles
         foo = None
+        bar = []
+        for tile in self.game.tileGroup:
+            #print(tile.rect.centerx, tile.rect.centery)
+            tmp1 = tile.rect.centerx + self.game.basesize*tile.sizew
+            tmp2 = tile.rect.centery
+            if((tmp1, tmp2) not in bar):
+                if(tmp1 <= self.game.windowwidth and tmp2 <= self.game.windowheight):
+                    bar.append((tmp1, tmp2))
+            tmp1 = tile.rect.centerx - self.game.basesize*tile.sizew
+            tmp2 = tile.rect.centery
+            if((tmp1, tmp2) not in bar):
+                if(tmp1 <= self.game.windowwidth and tmp2 <= self.game.windowheight):
+                    bar.append((tmp1, tmp2))
+            tmp1 = tile.rect.centerx
+            tmp2 = tile.rect.centery - self.game.basesize*tile.sizeh
+            if((tmp1, tmp2) not in bar):
+                if(tmp1 <= self.game.windowwidth and tmp2 <= self.game.windowheight):
+                    bar.append((tmp1, tmp2))
+            tmp1 = tile.rect.centerx
+            tmp2 = tile.rect.centery - self.game.basesize*tile.sizeh
+            if((tmp1, tmp2) not in bar):
+                if(tmp1 <= self.game.windowwidth and tmp2 <= self.game.windowheight):
+                    bar.append((tmp1, tmp2))
+            #print(bar)
+        for wall in self.game.wallGroup:
+            if(wall.marked):
+                for (i,j) in bar:
+                    if(wall.rect.collidepoint(i,j)):
+                        foo = wall.rect.center
+                        break
+                else:
+                    break
+                
+        """
         for wall in self.game.wallGroup:
             if(wall.marked):
                 foo = wall.rect.center
                 break
-        
+        """
         #Calculate movement vector
         if(foo):
             #print(foo, self.rect.x, self.rect.y)
@@ -173,6 +209,9 @@ class Game:
         
         self.basesize = 80
         
+        self.lattice = [["wall" for i in range(self.windowwidth//self.basesize)] for j in range(self.windowheight//self.basesize)]
+        #print(self.lattice)
+        
     def setup(self):
         pygame.init()
         pygame.display.set_caption(self.caption)
@@ -184,11 +223,13 @@ class Game:
         self.tileGroup = pygame.sprite.RenderPlain()
         self.impGroup = pygame.sprite.RenderPlain()
         
-        for i in range(self.basesize//2, 800, self.basesize):
-            for j in range(self.basesize//2, 800, self.basesize):
+        for i in range(self.basesize//2, self.windowheight, self.basesize):
+            for j in range(self.basesize//2, self.windowwidth, self.basesize):
                 if(i == j == 800 - self.basesize//2):
                     self.tileGroup.add(Tile(self, i, j, False))
                     self.impGroup.add(Imp(self, i, j, 1, 1, 1))
+                    self.lattice[-1][-1] = "tile"
+                    #print(self.lattice)
                 else:
                     self.wallGroup.add(Wall(self, i, j, False))
                     
