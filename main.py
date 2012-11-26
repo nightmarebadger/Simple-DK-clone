@@ -79,9 +79,10 @@ class Tile(pygame.sprite.Sprite):
             self.image.fill(WHITE, rect=(1, 1, self.width-2, self.height-2))
 
 class Imp(pygame.sprite.Sprite):
-    def __init__(self, x, y, movespeed, strength, hitspeed, carryload):
+    def __init__(self, game, x, y, movespeed, strength, hitspeed, sizew = 0.5, sizeh = 0.5):
         pygame.sprite.Sprite.__init__(self)
         
+        self.game = game
         self.x = x
         self.y = y
         self.movespeed = movespeed
@@ -91,12 +92,31 @@ class Imp(pygame.sprite.Sprite):
         
         self.vx = 0
         self.vy = 0
+        
+        self.sizew = sizew
+        self.sizeh = sizeh
+        
+        self.image = pygame.Surface((self.sizew*self.game.blowup, self.sizeh*self.game.blowup))
+        
+        
+        self.rect = self.image.get_rect()
+        self.rect.center = (x,y)
+        
+        self.image.fill(BLACK)
+        
+        pygame.draw.circle(self.image, YELLOW, (self.rect.width//2, self.rect.height//2), 5)
+        #pygame.draw.circl
+        
+        
     
     def update(self, time):
         self.calculatemove()
         self.move(self.vx*time, self.vy*time)
     
     def calculatemove(self):
+        pass
+    
+    def move(self, dx, dy):
         pass
     
         
@@ -118,6 +138,8 @@ class Game:
         self.selection_rect = None
         self.selection_first_pos = None
         
+        self.blowup = 40
+        
     def setup(self):
         pygame.init()
         pygame.display.set_caption(self.caption)
@@ -127,13 +149,16 @@ class Game:
         #Sprite groups
         self.wallGroup = pygame.sprite.RenderPlain()
         self.tileGroup = pygame.sprite.RenderPlain()
+        self.impGroup = pygame.sprite.RenderPlain()
         
         for i in range(20, 800, 40):
             for j in range(20, 800, 40):
                 if(i == 780 == j):
                     self.tileGroup.add(Tile(self, i, j, 40, 40, False))
+                    self.impGroup.add(Imp(self, i, j, 1, 1, 1))
                 else:
                     self.wallGroup.add(Wall(self, i, j, 40, 40, False))
+                    
 
         
     def gameloop(self):
@@ -187,11 +212,14 @@ class Game:
             
             #Update groups
             self.wallGroup.update(time/1000)
+            self.tileGroup.update(time/1000)
+            self.impGroup.update(time/1000)
             
             #Drawing
             self.surface.blit(self.background, (0,0))
             self.wallGroup.draw(self.surface)
             self.tileGroup.draw(self.surface)
+            self.impGroup.draw(self.surface)
             
             pygame.display.update()
             
