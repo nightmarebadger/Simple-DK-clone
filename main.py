@@ -97,6 +97,8 @@ class Imp(pygame.sprite.Sprite):
         self.sizew = sizew
         self.sizeh = sizeh
         
+        self.movex = self.movey = 0
+        
         self.image = pygame.Surface((self.sizew*self.game.basesize, self.sizeh*self.game.basesize), SRCALPHA, 32)
         self.image = self.image.convert_alpha()
         
@@ -107,19 +109,48 @@ class Imp(pygame.sprite.Sprite):
         #self.image.fill(BLACK)
         pygame.draw.circle(self.image, BLACK, (self.rect.width//2, self.rect.height//2), self.rect.width//2)
         pygame.draw.circle(self.image, YELLOW, (self.rect.width//2, self.rect.height//2), self.rect.width//2-1)
+        
+        #self.move(10,10)
         #pygame.draw.circl
         
         
     
     def update(self, time):
         self.calculatemove()
-        self.move(self.vx*time, self.vy*time)
+        self.move(self.vx*time*self.movespeed*self.game.basesize, self.vy*time*self.movespeed*self.game.basesize)
     
     def calculatemove(self):
-        pass
-    
+        #Find the position of a clicked area you can get to
+        foo = None
+        for wall in self.game.wallGroup:
+            if(wall.marked):
+                foo = wall.rect.center
+                break
+        
+        #Calculate movement vector
+        if(foo):
+            #print(foo, self.rect.x, self.rect.y)
+            try:
+                dx = self.rect.centerx - foo[0]
+                dy = self.rect.centery - foo[1]
+                #print(dx, dy)
+                self.vx = - dx/(dx**2 + dy**2)**(1/2)
+                self.vy = - dy/(dx**2 + dy**2)**(1/2)
+                #print(self.vx, self.vy)
+            except:
+                self.vx = self.vy = 0
+        else:
+            self.vx = self.vy = 0
+        
     def move(self, dx, dy):
-        pass
+        if(dx != 0 or dy != 0):
+            self.movex += dx
+            self.movey += dy
+            #print("moving...")
+            self.rect.x = self.rect.x + int(self.movex)
+            self.rect.y = self.rect.y + int(self.movey)
+            self.movex = self.movex - int(self.movex)
+            self.movey = self.movey - int(self.movey)
     
         
         
