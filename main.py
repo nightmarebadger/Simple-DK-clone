@@ -440,11 +440,11 @@ class Game:
             for j in range(self.basesize//2, self.windowwidth, self.basesize):
                 if(i == j == 800 - self.basesize//2):
                     self.tileGroup.add(Tile(self, i, j, False))
-                    self.impGroup.add(Imp(self, i+5, j, movespeed = 10, strength= 1, hitspeed = 1))
-                    self.impGroup.add(Imp(self, i-5, j, movespeed = 10, strength= 1, hitspeed = 1))
-                    self.impGroup.add(Imp(self, i, j+5, movespeed = 10, strength= 1, hitspeed = 1))
-                    self.impGroup.add(Imp(self, i, j-5, movespeed = 10, strength= 1, hitspeed = 1))
-                    self.impGroup.add(Imp(self, i-5, j-5, movespeed = 10, strength= 1, hitspeed = 1))
+                    self.impGroup.add(Imp(self, i+5, j, movespeed = 2, strength= 1, hitspeed = 1))
+                    #self.impGroup.add(Imp(self, i-5, j, movespeed = 2, strength= 1, hitspeed = 1))
+                    #self.impGroup.add(Imp(self, i, j+5, movespeed = 2, strength= 1, hitspeed = 1))
+                    #self.impGroup.add(Imp(self, i, j-5, movespeed = 2, strength= 1, hitspeed = 1))
+                    #self.impGroup.add(Imp(self, i-5, j-5, movespeed = 2, strength= 1, hitspeed = 1))
                     self.lattice[-1][-1] = "tile"
                 else:
                     self.wallGroup.add(Wall(self, i, j, False))
